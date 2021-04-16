@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.simpleyundisk.dao.BlackDao">
+
+    <insert id="insertInto">
+        insert  into black_p values(#{uid},#{count})
+    </insert>
+
+    <delete id="deleteUser">
+        delete  from black_p where uid=#{uid}
+    </delete>
+
+    <select id="queryByUid" resultType="Black">
+        select * from black_p where uid=#{id}
+    </select>
+
+    <update id="updateCount">
+        update black_p set count=#{count} where uid=#{uid}
+    </update>
+
+</mapper>

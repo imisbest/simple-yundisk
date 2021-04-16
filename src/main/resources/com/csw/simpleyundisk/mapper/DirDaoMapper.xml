@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.simpleyundisk.dao.DirDao">
+    <resultMap type="Dir" id="xx">
+        <id column="aid" property="id"/>
+        <result column="aname" property="name"/>
+        <result column="apath" property="path"/>
+        <result column="acount" property="count"/>
+        <result column="acreateTime" property="createTime"/>
+        <result column="astatus" property="status"/>
+        <result column="aisShare" property="isShare"/>
+        <result column="aicon" property="icon"/>
+        <result column="apid" property="did"/>
+        <association property="user" javaType="User">
+            <id column="uid" property="id"/>
+        </association>
+    </resultMap>
+
+    <insert id="addRootDir">
+    insert into dir_p
+    values(#{id},#{name},#{path},#{count},#{createTime},
+    #{status},#{isShare},#{icon},#{did},#{user.id})
+    </insert>
+
+    <select id="selectById" resultMap="xx">
+        select a.id as aid,a.name as aname, a.path as apath,a.count as acount,
+        a.create_time as acreateTime,a.status as astatus, a.is_share as aisShare,
+        a.icon as aicon,a.pid apid,
+        u.id as uid
+         from dir_p  a left join user_p  u on a.uid=u.id
+        where a.id=#{did}
+    </select>
+    <select id="selectByStatus" resultMap="xx">
+    select a.id as aid,a.name as aname, a.path as apath,a.count as acount,
+        a.create_time as acreateTime,a.status as astatus, a.is_share as aisShare,
+        a.icon as aicon,a.pid apid,
+        u.id as uid
+         from dir_p  a
+         left join user_p  u on a.uid=u.id
+        where a.status=#{status} and a.uid=#{user.id}
+    </select>
+    <select id="selectDirPath" resultType="Dir">
+        select *
+        from dir_p
+        where name=#{name} and path=#{path}
+    </select>
+
+    <!--根据父文件夹对象筛选出所有子文件夹 -->
+    <select id="selectAllFolderByFatherFolder" resultType="Dir">
+		select *
+		from dir_p
+		where path like '${path}%' and id!=#{id}
+	</select>
+
+    <delete id="deleteFolderById">
+        delete
+        from dir_p
+        where id=#{id}
+    </delete>
+
+    <select id="selectByName" resultType="Dir">
+        select *
+        from dir_p
+        where name=#{name}
+    </select>
+
+    <select id="queryAllById" resultType="Dir">
+        select *
+        from dir_p
+        where pid=#{did} and uid=#{user.id} and status=#{status}
+    </select>
+    <select id="queryAllByinSearchName" resultType="Dir">
+        select *
+        from dir_p
+        where name like '%${inSearchName}%' and uid=#{user.id} and status=#{status} and pid!=null
+    </select>
+    <select id="queryAllByIddirYd" resultType="Dir">
+        select *
+        from dir_p
+        where pid=#{did} and uid=#{user.id} and status=#{status} and id!=#{dirYd}
+    </select>
+    <select id="queryByPidAndName" resultType="Dir">
+        select *
+        from dir_p
+        where pid=#{did} and name=#{fileName}
+    </select>
+    <select id="queryFistDir" resultType="Dir">
+        select *
+        from dir_p
+        where uid=#{uid} and pid is null and status=#{status}
+    </select>
+    <select id="selectAllFolderBy" resultMap="xx">
+        select a.id as aid,a.name as aname, a.path as apath,a.count as acount,
+        a.create_time as acreateTime,a.status as astatus, a.is_share as aisShare,
+        a.icon as aicon,a.pid apid,
+        u.id as uid
+         from dir_p  a left join user_p  u on a.uid=u.id
+         where a.path like '${path0}%'and a.uid=#{user.id}
+         and a.status=#{status}
+    </select>
+    <select id="queryByIdPathUidStatus" resultType="Dir">
+        select *
+        from dir_p
+        where name=#{name} and path=#{path} and uid=#{user.id} and status=#{status}
+    </select>
+    <select id="selectByNamePid" resultType="Dir">
+         select *
+        from dir_p
+        where name=#{name} and path=#{path} and uid=#{user.id} and status=#{status}
+    </select>
+    <select id="queryByUserStatusNamePath" resultType="Dir">
+        select *
+        from dir_p
+        where uid=#{user.id} and status=#{status}
+        and name=#{dir.name} and path=#{dir.path}
+    </select>
+    <update id="updateNameById">
+        update dir_p
+        set name=#{name}
+        where id=#{id}
+    </update>
+    <update id="updatePathById">
+        update dir_p
+        set path=#{path}
+        where id=#{id}
+    </update>
+    <update id="updatePid">
+        update dir_p
+        set pid=#{pid}
+        where id=#{id}
+    </update>
+    <update id="updateStatue">
+         update dir_p
+        set status=#{status}
+        where id=#{id}
+    </update>
+</mapper>

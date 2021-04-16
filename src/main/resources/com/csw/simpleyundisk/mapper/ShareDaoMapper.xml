@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.simpleyundisk.dao.ShareDao">
+    <resultMap type="Share" id="xx1">
+        <id column="fid" property="id"/>
+        <result column="ffromId" property="fromId"/>
+        <result column="ftoId" property="toId"/>
+        <association property="fileEntity" javaType="FileEntity">
+            <id column="pid" property="id"/>
+            <result column="pname" property="name"/>
+            <!--column是数据库，property是实体类-->
+        </association>
+    </resultMap>
+    <resultMap type="Share" id="xx2">
+        <id column="fid" property="id"/>
+        <result column="ffromId" property="fromId"/>
+        <result column="ftoId" property="toId"/>
+        <association property="dir" javaType="Dir">
+            <id column="did" property="id"/>
+            <result column="dname" property="name"/>
+            <!--column是数据库，property是实体类-->
+        </association>
+    </resultMap>
+    <insert id="insert">
+        insert into share_f
+        values (#{id},#{fromId},#{toId},#{fileEntity.id},#{dir.id})
+    </insert>
+    <select id="queryAllFile" resultMap="xx1">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        p.id as pid,p.name as pname
+        from share_f f
+        left join file_p p on f.file_id=p.id
+        where f.to_id=#{toid} and f.dir_id is null
+    </select>
+    <select id="queryAllFiles" resultMap="xx1">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        p.id as pid,p.name as pname
+        from share_f f
+        left join file_p p on f.file_id=p.id
+        where f.dir_id is null
+    </select>
+    <select id="queryAllFilesLike" resultMap="xx1">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        p.id as pid,p.name as pname
+        from share_f f
+        left join file_p p on f.file_id=p.id
+        where p.name like '%${_parameter}%' and f.dir_id is null
+    </select>
+    <select id="queryAllDir" resultMap="xx2">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        d.id as did,d.name as dname
+        from share_f f
+        left join dir_p d on f.dir_id=d.id
+        where f.to_id=#{toid} and f.file_id is null
+    </select>
+    <select id="queryAllDirs" resultMap="xx2">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        d.id as did,d.name as dname
+        from share_f f
+        left join dir_p d on f.dir_id=d.id
+        where f.file_id is null
+    </select>
+    <select id="queryAllDirsLikes" resultMap="xx2">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        d.id as did,d.name as dname
+        from share_f f
+        left join dir_p d on f.dir_id=d.id
+        where d.name like '%${_parameter}%' and f.file_id is null
+    </select>
+    <select id="queryById" resultMap="xx1">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        p.id as pid,p.name as pname
+        from share_f f
+        left join file_p p on f.file_id=p.id
+        where f.id=#{id}
+    </select>
+    <select id="queryById2" resultMap="xx2">
+        select f.id as fid,f.from_id as ffromId,f.to_id as ftoId,
+        d.id as did,d.name as dname
+        from share_f f
+        left join dir_p d on f.dir_id=d.id
+        where f.id=#{id}
+    </select>
+    <delete id="deleteById">
+        delete from share_f
+        where id=#{id}
+    </delete>
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.simpleyundisk.dao.FileDao">
+    <resultMap type="FileEntity" id="xx">
+        <id column="fid" property="id"/>
+        <result column="fname" property="name"/>
+        <result column="fnewName" property="newName"/>
+        <result column="fzFile" property="zFile"/>
+        <result column="fpath" property="path"/>
+        <result column="fsizes" property="sizes"/>
+        <result column="ftype" property="type"/>
+        <result column="fcreateTime" property="createTime"/>
+        <result column="foptionTime" property="optionTime"/>
+        <result column="fcount" property="count"/>
+        <result column="fstatus" property="status"/>
+        <result column="fcheckMd5" property="checkMd5"/>
+        <result column="isShare" property="isShare"/>
+        <result column="ficon" property="icon"/>
+        <association property="dir" javaType="Dir">
+            <id column="did" property="id"/>
+        </association>
+        <association property="user" javaType="User">
+            <id column="uid" property="id"/>
+        </association>
+    </resultMap>
+    <insert id="addFile">
+    insert into file_p
+    values (#{id},#{name},#{newName},#{zFile},
+    #{path},#{sizes},#{type},#{createTime},#{optionTime},#{count},
+    #{status},#{checkMd5},#{isShare},#{icon},#{dir.id},#{user.id})
+    </insert>
+
+    <select id="selectFileById" resultMap="xx">
+    select f.id as fid,f.name as fname,f.new_name as fnewName,f.z_file as fzFile,
+    f.path as fpath,f.sizes as fsizes,type as ftype,f.create_time as fcreateTime
+    ,f.option_time as foptionTime,f.count as fcount,f.status as fstatus,
+    f.check_md5 as fcheckMd5,f.is_share as fisShare,f.icon as ficon,
+    d.id as did,u.id as uid
+     from file_p f
+     left join user_p  u on f.uid=u.id
+     left join dir_p  d on f.pid=d.id
+     where f.id=#{fileId}
+    </select>
+    <select id="selectByStatus" resultMap="xx">
+       select f.id as fid,f.name as fname,f.new_name as fnewName,f.z_file as fzFile,
+    f.path as fpath,f.sizes as fsizes,type as ftype,f.create_time as fcreateTime
+    ,f.option_time as foptionTime,f.count as fcount,f.status as fstatus,
+    f.check_md5 as fcheckMd5,f.is_share as fisShare,f.icon as ficon,
+    d.id as did,u.id as uid
+     from file_p f
+     left join user_p  u on f.uid=u.id
+     left join dir_p  d on f.pid=d.id
+     where f.status=#{status} and f.uid=#{user.id}
+    </select>
+    <delete id="deleteFileById">
+        delete from file_p
+        where id=#{fileId}
+    </delete>
+
+    <delete id="deleteFileByFolderId">
+        delete from file_p
+        where pid=#{id}
+    </delete>
+
+
+    <update id="updateCount">
+        update file_p
+        set count=#{newCount}
+        where id=#{id}
+    </update>
+    <select id="queryAllById" resultMap="xx">
+        select f.id as fid,f.name as fname,f.new_name as fnewName,f.z_file as fzFile,
+    f.path as fpath,f.sizes as fsizes,type as ftype,f.create_time as fcreateTime
+    ,f.option_time as foptionTime,f.count as fcount,f.status as fstatus,
+    f.check_md5 as fcheckMd5,f.is_share as fisShare,f.icon as ficon,
+    d.id as did,u.id as uid
+     from file_p f
+     left join user_p  u on f.uid=u.id
+      left join dir_p  d on f.pid=d.id
+        where f.pid=#{did} and f.uid=#{user.id} and f.status=#{status}
+    </select>
+    <select id="queryAllByinSearchName" resultType="FileEntity">
+     select *
+     from file_p
+     where name like '%${inSearchName}%' and uid=#{user.id} and status=#{status}
+</select>
+    <select id="selectFileByPidAndMd5" resultType="FileEntity">
+        select *
+        from file_p
+        where pid=#{id} and check_md5=#{checkMd5}
+    </select>
+    <select id="selectByMd5" resultType="FileEntity">
+        select *
+        from file_p
+        where check_md5=#{checkMd5}
+    </select>
+    <select id="queryFileByPid" resultMap="xx">
+        select id as fid,name as fname,new_name as fnewName,z_file as fZFile,
+    path as fpath,sizes as fsizes,type as ftype,create_time as fcreateTime
+    ,option_time as foptionTime,count as fcount,status as fstatus,check_md5 as fcheckMd5
+    ,is_share as fisShare,icon as ficon
+     from file_p
+     where pid=#{id}
+    </select>
+
+    <select id="selectAllFileByFatherFolder" resultMap="xx">
+       select f.id as fid,f.name as fname,f.new_name as fnewName,f.z_file as fzFile,
+    f.path as fpath,f.sizes as fsizes,type as ftype,f.create_time as fcreateTime
+    ,f.option_time as foptionTime,f.count as fcount,f.status as fstatus,
+    f.check_md5 as fcheckMd5,f.is_share as fisShare,f.icon as ficon,
+    d.id as did,u.id as uid
+     from file_p f
+     left join user_p  u on f.uid=u.id
+      left join dir_p  d on f.pid=d.id
+      where f.path like '${path}%'
+     and f.uid=#{user.id} and f.status=#{status}
+    </select>
+    <!--已解决: mybatis报错 org.apache.ibatis.reflection.ReflectionException: There is no getter
+    for property named 'xxx' in 'class java.lang.String'
+    只有一个参数的时候 '${_parameter}%'
+    -->
+    <update id="updatePathAndPid">
+        update file_p
+        set path=#{path} and pid=#{dir.id}
+        where id=#{id}
+    </update>
+    <update id="updateNameById">
+        update file_p
+        set name=#{name}
+        where id=#{id}
+    </update>
+    <select id="queryByUserStatusNamePath" resultType="FileEntity">
+        select *
+        from file_p
+        where uid=#{user.id} and status=#{status}
+        and name=#{fileEntity.name} and path=#{fileEntity.path}
+    </select>
+    <update id="updatePathById">
+        update file_p
+        set path=#{path}
+        where id=#{id}
+    </update>
+    <update id="updateDid">
+        update file_p
+        set pid=#{pid}
+        where id=#{id}
+    </update>
+    <update id="updateStatus">
+        update file_p
+        set status=#{status}
+        where id=#{id}
+    </update>
+    <select id="queryLater" resultType="FileEntity">
+        select * from file_p
+        where DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(option_time)
+        and uid=#{user.id} and status=#{status}
+        order by option_time desc  limit 0,10
+    </select>
+    <update id="updateTime">
+        update file_p
+        set option_time=#{optionTime}
+        where id=#{id}
+    </update>
+</mapper>
